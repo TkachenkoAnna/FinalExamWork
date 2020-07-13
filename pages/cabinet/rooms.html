@@ -78,6 +78,7 @@
                     <option value="9">9</option>
                     <option value="10">10</option>
                 </select>
+                <div class="date"></div>
             </form>    
         </div>
         <div class="modal-footer">
@@ -93,6 +94,7 @@
     $(document).ready(function() {
         $("#hotel_name").text(EDITHOTEL_ID.name);
         getRoomsTable(EDITHOTEL_ID.id);
+        pickmeup('.date');
 
     });
 
@@ -142,6 +144,7 @@ function openEditRooms($btn) {
         form.find("input[name='name']").val(json.name);
         form.find("input[name='amenities']").val(json.amenities.name);
         form.find("select[name='persons_select']").val(json.persons);
+        form.find("div[class='date']").val();
     });
 }
 
@@ -153,7 +156,8 @@ function saveRooms($btn) {
             r_id = form.find("input[name='id']").val(),
             name = form.find("input[name='name']").val(),
             amen = form.find("input[name='amenities']").val(),
-            persons = form.find("select[name='persons_select']").val();
+            persons = form.find("select[name='persons_select']").val(),
+            date = form.find("div[class='date']").val();
         if (name == "") {
             valid = false;
         }

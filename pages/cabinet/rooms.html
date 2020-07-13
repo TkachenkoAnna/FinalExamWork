@@ -1,0 +1,208 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Список номеров <span id="hotel_name"></span></h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#roomsModal"><i class="fas fa-plus-circle"></i> Добавить номер</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Изображения</th>
+                <th>Дополнительные услуги</th>
+                <th>Кол-во людей</th>
+                <th>Цены</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody id="rooms_tbody"></tbody>
+    </table>
+</div>
+<div class="modal fade" id="roomsModal" tabindex="-1" aria-labelledby="roomsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="roomsModalLabel">Add/Edit service</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="rooms_form">
+                <input type="hidden" name="id" value="new">
+
+                <div class="form-file">
+                    <input type="file" class="form-file-input" id="roomsIcon">
+                    <label class="form-file-label" for="customFile">
+                      <span class="form-file-text">Выберать файл...</span>
+                      <span class="form-file-button">Загрузить</span>
+                    </label>
+                </div>
+                <br>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Название</label>
+                    <input type="text" class="form-control" name="name">
+                </div>
+
+                <div class="amenities_selector">
+                    <span> Дополнительные услуги:</span>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="a1" name="amenities">
+                        <label class="form-check-label" for="a1">
+                          Дополнительная кровать
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="a2">
+                            <label class="form-check-label" for="a2">
+                            Фен
+                            </label>
+                    </div>    
+                </div>
+                <br>
+                <select class="form-select" aria-label="service_persons" name="persons_select">
+                    <option selected>Количество людей</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </form>    
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary" onclick="saveRooms($(this))">Сохранить</button>
+        </div>
+      </div>
+    </div>
+</div> 
+
+<script src="assets/js/rooms.js"></script>
+<script>
+    $(document).ready(function() {
+        $("#hotel_name").text(EDITHOTEL_ID.name);
+        getRoomsTable(EDITHOTEL_ID.id);
+
+    });
+
+    function getRoomsTable(h_id) {
+        ROOMS.getList(h_id).done(function(json) {
+            let tbody = '',
+                room,
+                RA,
+                img;
+            for (let i = 0; i < json.results.length; i++) {
+                room = json.results[i];
+                img = (room.photos != "") ? `<img src="${room.photos}" style="height:60px" alt="${room.name}">` : '';
+                RA = room.amenities;
+                let roomAm = '';
+                    for (let r = 0; r < RA.length; r++) {
+                        roomAm += RA[r].name + '; ';
+                    }
+                    tbody += `
+                        <tr>
+                            <td>${room.id}</td>
+                            <td>${room.name}</td>
+                            <td>${img}</td>
+                            <td>${roomAm}</td>
+                            <td>${room.persons}</td>
+                            <td>${room.prices}</td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="openEditRooms($(this))" data-id="${room.id}"><i class="fas fa-edit"></i> Редактировать</a>
+                                <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="openDeleteRooms($(this))" data-id="${room.id}"><i class="far fa-trash-alt"></i> Удалить</a>
+                            </td>
+                        </tr>
+                    `;
+            }
+            $("#rooms_tbody").html(tbody);
+        }).fail(function(err) {
+            showMessage(errorText(err.status), 'error');
+        });
+    }
+
+let h_id = EDITHOTEL_ID.id;
+
+function openEditRooms($btn) {
+    let r_id = $btn.data("id");
+    ROOMS.getOne(h_id, r_id).done(function(json) {
+        let form = $("#rooms_form");
+        $('[data-target="#roomsModal"]')[0].click();
+        form.find("input[name='id']").val(json.id);
+        form.find("input[name='name']").val(json.name);
+        form.find("input[name='amenities']").val(json.amenities.name);
+        form.find("select[name='persons_select']").val(json.persons);
+    });
+}
+
+function saveRooms($btn) {
+    if (!$btn.hasClass("disabled")) {
+        $btn.addClass("disabled");
+        let valid = true,
+            form = $("#rooms_form"),
+            r_id = form.find("input[name='id']").val(),
+            name = form.find("input[name='name']").val(),
+            amen = form.find("input[name='amenities']").val(),
+            persons = form.find("select[name='persons_select']").val();
+        if (name == "") {
+            valid = false;
+        }
+        if (valid) {
+            let data = new FormData(form[0]);
+            if (r_id == 'new') {
+                ROOMS.add(h_id, data).done(function() {
+                    form[0].reset();
+                    form.find("input[name='id']").val('new');
+                    $('[data-dismiss="modal"]')[0].click();
+                    $btn.removeClass("disabled");
+                    getRoomsTable(EDITHOTEL_ID.id);
+                });
+            } else {
+                ROOMS.update(h_id, r_id, data).done(function() {
+                    form[0].reset();
+                    form.find("input[name='id']").val('new');
+                    $('[data-dismiss="modal"]')[0].click();
+                    $btn.removeClass("disabled");
+                    getRoomsTable(EDITHOTEL_ID.id);
+                });
+            }
+        } else {
+            $btn.removeClass("disabled");
+        }
+    }
+}
+
+function openDeleteRooms($btn) {
+    let r_id = $btn.data("id");
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Delete service with id: " + r_id,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.value) {
+            ROOMS.delete(h_id, r_id).done(function() {
+                getRoomsTable(EDITHOTEL_ID.id);
+                Swal.fire(
+                    'Deleted!',
+                    'Room has been deleted.',
+                    'success'
+                );
+            });
+        }
+    })
+}
+</script>

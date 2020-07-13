@@ -1,0 +1,61 @@
+<link href="https://codeseven.github.io/toastr/build/toastr.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/plugins/sweetalert2/sweetalert2.min.css">
+<link rel="stylesheet" href="assets/fontawesome/fontawesome.min.css">
+<link rel="stylesheet" href="assets/fontawesome/all.min.css">
+
+<nav class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-md-3 col-lg-2 mr-0 px-3" href="#">Company name</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div>Hello,admin!</div>
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" href="javascript:void(0)" onclick="USER.logout()">Sign out</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-warning sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item active">
+                        <a class="nav-link text-dark" aria-current="page" href="javascript:void(0)" data-content="hotels">
+                            <span data-feather="home" class="fas fa-hotel"></span> Отели
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" aria-current="page" href="javascript:void(0)" data-content="services">
+                            <span data-feather="home" class="fas fa-bed"></span> Сервисы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" aria-current="page" href="javascript:void(0)" data-content="amenities">
+                            <span data-feather="home" class="fas fa-concierge-bell"></span> Дополнительные услуги
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" aria-current="page" href="#">
+                            <span data-feather="home" class="fas fa-file-invoice-dollar"></span> Заказы
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4" id="cabinet_content"></main>
+    </div>
+</div>
+
+<script>
+    let EDITHOTEL_ID = {};
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://codeseven.github.io/toastr/build/toastr.min.js"></script>
+<script src="assets/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="assets/js/functions.js"></script>
+<script src="assets/js/users.js"></script>
+<script src="assets/js/cabinet_onload.js"></script> 

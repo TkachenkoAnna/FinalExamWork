@@ -1,0 +1,171 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Дополнительные услуги</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#amenitiesModal"><i class="fas fa-plus-circle"></i> Добавить услугу</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Иконка</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody id="amenities_tbody"></tbody>
+    </table>
+</div>
+<div class="modal fade" id="amenitiesModal" tabindex="-1" aria-labelledby="amenitiesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="amenitiesModalLabel">Add/Edit service</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="amenities_form">
+                <input type="hidden" name="id" value="new">
+
+                <div class="form-file">
+                    <input type="file" class="form-file-input" id="amenitiesIcon" name="icon">
+                    <label class="form-file-label" for="amenitiesIcon">
+                      <span class="form-file-text">Выберите файл...</span>
+                      <span class="form-file-button">Загрузить</span>
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Название</label>
+                    <input type="text" class="form-control" name="name">
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Описание</label>
+                    <textarea class="form-control" name="description"></textarea>
+                </div>
+            </form>    
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary" onclick="saveAmenities($(this))">Сохранить</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<script src="assets/js/amenities.js"></script>
+<script>
+    $(document).ready(function() {
+        getAmenitiesTable();
+
+        $('[data-target="#amenitiesModal"]').click(function() {
+            let form = $("#amenities_form");
+            form[0].reset();
+            form.find("input[name='id']").val('new');
+        });
+    });
+
+    function getAmenitiesTable() {
+        AMENITIES.getList().done(function(json) {
+            let tbody = '',
+                amenity,
+                icon,
+                description;
+            for (let i = 0; i < json.results.length; i++) {
+                amenity = json.results[i];
+                icon = (amenity.icon != null) ? `<img src="${amenity.icon}" style="height:40px" alt="${amenity.name}">` : '';
+                description = (amenity.description != null) ? `${amenity.description}` : '';
+                tbody += `
+                    <tr>
+                        <td>${amenity.id}</td>
+                        <td>${amenity.name}</td>
+                        <td>${description}</td>
+                        <td>${icon}</td>
+                        <td>
+                            <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="openEditAmenity($(this))" data-id="${amenity.id}"><i class="fas fa-edit"></i> Редактировать</a>
+                            <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="openDeleteAmenity($(this))" data-id="${amenity.id}"><i class="far fa-trash-alt"></i> Удалить</a>
+                        </td>
+                    </tr>
+                `;
+            }
+            $("#amenities_tbody").html(tbody);
+        });
+    }
+
+    function openEditAmenity($btn) {
+        let id = $btn.data("id");
+        AMENITIES.getOne(id).done(function(json) {
+            let form = $("#amenities_form");
+            $('[data-target="#amenitiesModal"]')[0].click();
+            form.find("input[name='id']").val(json.id);
+            form.find("input[name='name']").val(json.name);
+            form.find("textarea[name='description']").val(json.description);
+        });
+    }
+    
+    function saveAmenities($btn) {
+    if (!$btn.hasClass("disabled")) {
+        $btn.addClass("disabled");
+        let valid = true,
+            form = $("#amenities_form"),
+            id = form.find("input[name='id']").val(),
+            name = form.find("input[name='name']").val();
+        if (name == "") {
+            valid = false;
+        }
+        if (valid) {
+            let data = new FormData(form[0]);
+            if (id == 'new') {
+                AMENITIES.add(data).done(function() {
+                    form[0].reset();
+                    form.find("input[name='id']").val('new');
+                    $('[data-dismiss="modal"]')[0].click();
+                    $btn.removeClass("disabled");
+                    getAmenitiesTable();
+                });
+            } else {
+                AMENITIES.update(id, data).done(function() {
+                    form[0].reset();
+                    form.find("input[name='id']").val('new');
+                    $('[data-dismiss="modal"]')[0].click();
+                    $btn.removeClass("disabled");
+                    getAmenitiesTable();
+                });
+            }
+        } else {
+            $btn.removeClass("disabled");
+        }
+    }
+}
+
+function openDeleteAmenity($btn) {
+    let id = $btn.data("id");
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Delete service with id: " + id,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.value) {
+            AMENITIES.delete(id).done(function() {
+                getAmenitiesTable();
+                Swal.fire(
+                    'Deleted!',
+                    'Service has been deleted.',
+                    'success'
+                );
+            });
+        }
+    })
+}
+</script>

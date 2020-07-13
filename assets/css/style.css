@@ -1,0 +1,22 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.row {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+}
+#sidebarMenu {
+  padding: 0;
+}
+#sidebarMenu ul li {
+  padding: 10px 0;
+}
+#sidebarMenu ul li:hover {
+  background-color: #FCFC49;
+}
+#sidebarMenu ul li.active {
+  background-color: #FCFC49;
+}

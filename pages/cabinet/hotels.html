@@ -1,0 +1,192 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Список отелей</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#hotelModal"><i class="fas fa-plus-circle"></i> Добавить отель</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Название</th>
+                <th>Изображения</th>
+                <th>Сервисы</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody id="hotels_tbody"></tbody>
+    </table>
+</div>
+<div class="modal fade" id="hotelModal" tabindex="-1" aria-labelledby="hotelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="hotelModalLabel">Добавить/редактировать отель</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="hotel_form">
+                <input type="hidden" name="id" value="new">
+
+                <div class="form-file form-file-sm">
+                    <input type="file" class="form-file-input" id="addHotelPhotos" name="icon">
+                    <label class="form-file-label" for="addHotelPhotos">
+                      <span class="form-file-text">Выберите файл...</span>
+                      <span class="form-file-button">Загрузить</span>
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Название</label>
+                    <input type="text" class="form-control" name="name">
+                </div>
+                <select class="form-select" multiple aria-label="multiple service_select" name="service_select">
+                    <option id="services_select"></option>
+                    <!--<option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>-->
+                </select>
+            </form>    
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-primary" onclick="saveHotel($(this))">Сохранить</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script src="assets/js/hotels.js"></script>
+<script src="assets/js/services.js"></script>
+<script>
+    $(document).ready(function() {
+        getHotelTable();
+    });
+
+    function getHotelTable() {
+        HOTELS.getList().done(function(json) {
+            let tbody = '',
+                hotel,
+                img;
+            for (let i = 0; i < json.results.length; i++) {
+                hotel = json.results[i];
+                img = (hotel.photos != "") ? `<img src="${hotel.photos}" style="height: 60px" alt="${hotel.name}">` : '';
+                room = json.results[i].rooms;
+                let roomID = '';
+                for (let r = 0; r < room.length; r++) {
+                    roomID += room[r].id + '; ';
+                }
+                tbody += `
+                    <tr>
+                        <td>${hotel.id}</td>
+                        <td>${hotel.name}</td>
+                        <td>${img}</td>
+                        <td>${hotel.services}</td>
+                        <td>
+                            <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="editHotel($(this))" data-id="${hotel.id}"><i class="fas fa-edit"></i> Редактировать</a>
+                            <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="askDeleteHotel($(this))" data-id="${hotel.id}"><i class="far fa-trash-alt"></i> Удалить</a>
+                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="hotelRooms($(this))" data-id="${hotel.id}" data-name="${hotel.name}">Номера</a>
+                            </td>
+                    </tr>
+                `;
+            }
+            $("#hotels_tbody").html(tbody);
+        }).fail(function(err) {
+            showMessage(errorText(err.status), 'error');
+        });
+    }
+
+    function editHotel($btn) {
+        let id = $btn.data("id");
+        HOTELS.getOne(id).done(function(json) {
+            let form = $("#hotel_form");
+            form.find("input[name='id']").val(json.id);
+            form.find("input[name='name']").val(json.name);
+            form.find("select[name='service_select']").val(json.service_select);//
+            $('[data-target="#hotelModal"]')[0].click();
+        });
+    }
+
+    function saveHotel($btn) {
+        if (!$btn.hasClass("disabled")) {
+            $btn.addClass("disabled");
+            let valid = true,
+                form = $("#hotel_form"),
+                id = form.find("input[name='id']").val(),
+                name = form.find("input[name='name']").val();
+            if (name == "") {
+                valid = false;
+            }
+            if (valid) {
+                let data = new FormData(form[0]);
+                if (id == 'new') {
+                    HOTELS.add(data).done(function() {
+                        form[0].reset();
+                        form.find("input[name='id']").val('new');
+                        $('[data-dismiss="modal"]')[0].click();
+                        $btn.removeClass("disabled");
+                        getHotelTable();
+                    });
+                } else {
+                    HOTELS.update(id, data).done(function() {
+                        form[0].reset();
+                        form.find("input[name='id']").val('new');
+                        $('[data-dismiss="modal"]')[0].click();
+                        $btn.removeClass("disabled");
+                        getHotelTable();
+                    });
+                }
+            } else {
+                $btn.removeClass("disabled");
+            }
+        }
+    }    
+
+    function hotelRooms ($btn) {
+        EDITHOTEL_ID = {id: $btn.data("id"), name: $btn.data("name")};
+        loadCabinet('rooms');
+    }
+
+    function getOptions(elem, id = 0) {
+        SERVICES.getList().done(function(json) {
+            let opts = `<option value="0">-=Select services=-</option>`,
+                selected = '';
+            for (let i = 0; i < json.results.length; i++) {
+                selected = (json.results[i].id == id) ? ' selected' : '';
+                opts += `<option value="${json.results[i].id}"${selected}>${json.results[i].name}</option>`;
+            }
+            $("#services_select").html(opts);
+        }).fail(function(err) {
+            showMessage(errorText(err.status), 'error');
+        });
+    }
+
+    function askDeleteHotel($btn) {
+    let id = $btn.data("id");
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Delete service with id: " + id,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.value) {
+            HOTELS.delete(id).done(function() {
+                getHotelTable();
+                Swal.fire(
+                    'Deleted!',
+                    'Service has been deleted.',
+                    'success'
+                );
+            });
+        }
+    })
+}
+</script>

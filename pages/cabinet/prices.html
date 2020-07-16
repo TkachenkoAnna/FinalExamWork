@@ -1,0 +1,187 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Цены номера <span id="room_name"></span></h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pricesModal"><i class="fas fa-plus-circle"></i> Добавить еще</button>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Период</th>
+                <th>Стоимость</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody id="prices_tbody"></tbody>
+    </table>
+</div>
+
+<!--Модальное окно для редактирования -->
+
+<div class="modal fade" id="pricesModal" tabindex="-1" aria-labelledby="pricesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pricesModalLabel">Добавить/редактировать стоимость</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+            </div>
+            <div class="modal-body">
+                <form id="prices_form">
+                    <input type="hidden" name="id" value="new">
+                    <div class="row">
+                        <div>Выберите дату:</div>
+                        <div class="col-xs-6">
+                            <div class="form-group">
+                                <div class="input-group date" id="pickdate1" data-provide="datepicker">
+                                    <input type="text" name="date" class="form-control"/>
+                                    <span class="input-group-addon">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Стоимость:</label>
+                            <input type="text" class="form-control" name="price">
+                        </div>
+                    </div> 
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="savePrices($(this))">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/prices.js"></script>
+
+<script>
+$(document).ready(function() {
+    $("#room_name").text(EDITROOM_ID.name);
+    getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id );
+
+    $("#pickdate1").datepicker({
+        useCurrent: true,
+        autoclose: true,
+        language: 'ru'
+    });
+    /*$("#pickdate2").datepicker({
+        autoclose: true,
+        language: 'ru'
+    });
+    $("#pickdate1").on("dp.change", function (e) {
+        $('#pickdate2').data("datepicker").minDate(e.date);
+    });
+    $("#pickdate2").on("dp.change", function (e) {
+        $('#pickdate1').data("datepicker").maxDate(e.date);
+    });*/
+
+});
+
+function getPricesTable(h_id, r_id) {
+    PRICES.getList(h_id, r_id).done(function(json) {
+        let tbody = '',
+            price;
+        for (let i = 0; i < json.results.length; i++) {
+            price = json.results[i];
+            tbody += `
+                    <tr>
+                        <td>${price.id}</td>
+                        <td>${price.date}</td>
+                        <td>${price.price}</td>
+                        <td>
+                            <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="openEditPrice($(this))" data-id="${price.id}"><i class="fas fa-edit"></i></a>
+                            <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="openDeletePrice($(this))" data-id="${price.id}"><i class="far fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                `;
+        }
+        $("#prices_tbody").html(tbody);
+    }).fail(function(err) {
+        showMessage(errorText(err.status), 'error');
+    });
+}
+
+
+let r_id = EDITROOM_ID.id;
+
+    function openEditPrice($btn) {
+        let p_id = $btn.data("id");
+        PRICES.getOne(h_id, r_id, p_id).done(function(json) {
+            let form = $("#prices_form");
+            $('[data-target="#pricesModal"]')[0].click();
+            form.find("input[name='id']").val(json.id);
+            form.find("input[name='date']").val(json.date);
+            form.find("input[name='price']").val(json.price);
+        });
+    }
+
+    function savePrices($btn) {
+        if (!$btn.hasClass("disabled")) {
+            $btn.addClass("disabled");
+            let valid = true,
+                form = $("#prices_form"),
+                p_id = form.find("input[name='id']").val(),
+                date = form.find("input[name='date']").val(),
+                price = form.find("select[name='price']").val();
+            if (date == "") {
+                valid = false;
+            }
+            if (valid) {
+                let data = new FormData(form[0]);
+                if (p_id == 'new') {
+                    PRICES.add(h_id, r_id, data).done(function() {
+                        form[0].reset();
+                        form.find("input[name='id']").val('new');
+                        $('[data-dismiss="modal"]')[0].click();
+                        $btn.removeClass("disabled");
+                        getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id);
+                    });
+                } else {
+                    PRICES.update(h_id, r_id, data).done(function() {
+                        form[0].reset();
+                        form.find("input[name='id']").val('new');
+                        $('[data-dismiss="modal"]')[0].click();
+                        $btn.removeClass("disabled");
+                        getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id);
+                    });
+                }
+            } else {
+                $btn.removeClass("disabled");
+            }
+        }
+    }
+
+    function openDeletePrice($btn) {
+        let p_id = $btn.data("id");
+        Swal.fire({
+            title: 'Вы уверены?',
+            text: "Удалить стоимость с id: " + p_id,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Да, удалить ее!'
+        }).then((result) => {
+            if (result.value) {
+                PRICES.delete(h_id, r_id, p_id).done(function() {
+                    getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id);
+                    Swal.fire(
+                        'Удалено!',
+                        'Стоимость удалена.',
+                        'success'
+                    );
+                });
+            }
+        })
+    }
+
+</script>

@@ -13,7 +13,8 @@
                 <th>#</th>
                 <th>Название</th>
                 <th>Изображения</th>
-                <th>Сервисы</th>
+                <th class="col-md-4">Сервисы</th>
+                <th>Номера</th>
                 <th>Действие</th>
             </tr>
         </thead>
@@ -32,22 +33,14 @@
             <div class="modal-body">
                 <form id="hotel_form">
                     <input type="hidden" name="id" value="new">
-                    <!--картинку тут убираем, так как картинки грузятся по другому запросу API для уже созданного отеля-->
-                    <!--
-                    <div class="form-file form-file-sm">
-                        <input type="file" class="form-file-input" id="addHotelPhotos" name="photos">
-                        <label class="form-file-label" for="addHotelPhotos">
-                            <span class="form-file-text">Выберите файл...</span>
-                            <span class="form-file-button">Загрузить</span>
-                        </label>
-                    </div>
-                    -->
                     <div class="mb-3">
                         <label for="name" class="form-label">Название</label>
                         <input type="text" class="form-control" name="name">
                     </div>
-                    <!--по id services_select формируется и вставляется список услуг, именно список option-->
-                    <select class="form-select" multiple aria-label="multiple service_select" name="services" id="services_select"></select>
+                    <div class="services_selector">
+                    </div>
+                    <!--по id services_select формируется и вставляется список услуг, именно список option
+                    <select class="form-select" multiple aria-label="multiple service_select" name="services" id="services_select"></select>-->
                 </form>
             </div>
             <div class="modal-footer">
@@ -91,10 +84,10 @@
                         <td>${hotel.name}</td>
                         <td>${img}</td>
                         <td>${service_names.join(', ')}</td>
+                        <td><a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="hotelRooms($(this))" data-id="${hotel.id}" data-name="${hotel.name}"><i class="fas fa-door-open"></i>  Номера</a></td>
                         <td>
                             <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="editHotel($(this))" data-id="${hotel.id}"><i class="fas fa-edit"></i> Редактировать</a>
                             <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="askDeleteHotel($(this))" data-id="${hotel.id}"><i class="far fa-trash-alt"></i> Удалить</a>
-                            <a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="hotelRooms($(this))" data-id="${hotel.id}" data-name="${hotel.name}"><i class="fas fa-door-open"></i>  Номера</a>
                         </td>
                     </tr>
                 `;
@@ -170,8 +163,11 @@
         };
         loadCabinet('rooms');
     }
-
-    function getOptions(elem, id = 0) {
+ 
+    /*
+    функция для  выбора сервисов в виде селекта
+    */
+    /*function getOptions(elem, id = 0) {
         SERVICES.getList().done(function(json) {
             let opts = `<option value="0" disabled>-=Выберите услуги=-</option>`,
                 selected = '';
@@ -182,25 +178,41 @@
         }).fail(function(err) {
             showMessage(errorText(err.status), 'error');
         });
+    }*/
+
+    /*
+    функция получения и динамического заполнения списка сервисов
+    */
+    function getOptions() {
+        SERVICES.getList().done(function(json) {
+            let html = '<span> Выберите сервисы:</span>';
+            json.results.forEach(function(s) {
+                html += `<div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="https://beetroot.quidow.pp.ua/api/services/${s.id}/" id="s${s.id}" name="services">
+                    <label class="form-check-label" for="s${s.id}">${s.name}</label>
+                </div>`;
+            });
+            $(".services_selector").html(html);
+        });
     }
 
     function askDeleteHotel($btn) {
         let id = $btn.data("id");
         Swal.fire({
-            title: 'Are you sure?',
-            text: "Delete service with id: " + id,
+            title: 'Вы уверены?',
+            text: "Удалить отель  id: " + id,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: 'Да, удалить его!'
         }).then((result) => {
             if (result.value) {
                 HOTELS.delete(id).done(function() {
                     getHotelTable();
                     Swal.fire(
-                        'Deleted!',
-                        'Service has been deleted.',
+                        'Удалено!',
+                        'Отель удален.',
                         'success'
                     );
                 });

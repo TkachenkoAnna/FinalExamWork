@@ -71,18 +71,9 @@ $(document).ready(function() {
     $("#pickdate1").datepicker({
         useCurrent: true,
         autoclose: true,
-        language: 'ru'
+        language: 'ru',
+        format: 'yyyy-mm-dd'
     });
-    /*$("#pickdate2").datepicker({
-        autoclose: true,
-        language: 'ru'
-    });
-    $("#pickdate1").on("dp.change", function (e) {
-        $('#pickdate2').data("datepicker").minDate(e.date);
-    });
-    $("#pickdate2").on("dp.change", function (e) {
-        $('#pickdate1').data("datepicker").maxDate(e.date);
-    });*/
 
 });
 
@@ -111,7 +102,7 @@ function getPricesTable(h_id, r_id) {
 }
 
 
-let r_id = EDITROOM_ID.id;
+    r_id = EDITROOM_ID.id;
 
     function openEditPrice($btn) {
         let p_id = $btn.data("id");
@@ -146,7 +137,7 @@ let r_id = EDITROOM_ID.id;
                         getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id);
                     });
                 } else {
-                    PRICES.update(h_id, r_id, data).done(function() {
+                    PRICES.update(h_id, r_id, p_id, data).done(function() {
                         form[0].reset();
                         form.find("input[name='id']").val('new');
                         $('[data-dismiss="modal"]')[0].click();

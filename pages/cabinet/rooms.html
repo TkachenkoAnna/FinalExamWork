@@ -67,19 +67,50 @@
                     </div>
                     <br>
                     <select class="form-select" aria-label="service_persons" name="persons_select">
-                    <option selected>Количество людей</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                </select>
-                    <div class="date"></div>
+                        <option selected>Количество людей</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                    <br>
+                    <div class="row">
+                        <div>Добавьте цены:</div>
+                        <div>Выберите период:</div>
+                        <div class="col-xs-6">
+                            <div class="form-group">
+                                <div class="input-group date" id="pickdate1" data-provide="datepicker">
+                                    <input type="text" class="form-control"/>
+                                    <span class="input-group-addon">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="form-group">
+                                <div class="input-group date" id="pickdate2" data-provide="datepicker">
+                                    <input type="text" class="form-control"/>
+                                    <span class="input-group-addon">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Стоимость:</label>
+                            <input type="text" class="form-control" name="price">
+                            <span class="input-group-addon"> Добавить еще: 
+                                <i class="fas fa-plus-circle"></i>
+                            </span>
+                        </div>
+                    </div> 
                 </form>
             </div>
             <div class="modal-footer">
@@ -92,14 +123,30 @@
 
 <script src="assets/js/rooms.js"></script>
 <script src="assets/js/amenities.js"></script>
+
 <script>
+    
     $(document).ready(function() {
         $("#hotel_name").text(EDITHOTEL_ID.name);
         getRoomsTable(EDITHOTEL_ID.id);
-        pickmeup('.date');
-
         fillAmenitiesBox();
 
+        $("#pickdate1").datepicker({
+            useCurrent: true,
+            autoclose: true,
+            language: 'ru'
+        });
+        $("#pickdate2").datepicker({
+            autoclose: true,
+            language: 'ru'
+        });
+        $("#pickdate1").on("dp.change", function (e) {
+            $('#pickdate2').data("datepicker").minDate(e.date);
+        });
+        $("#pickdate2").on("dp.change", function (e) {
+            $('#pickdate1').data("datepicker").maxDate(e.date);
+        });
+        
     });
 
     function getRoomsTable(h_id) {
@@ -107,7 +154,8 @@
             let tbody = '',
                 room,
                 RA,
-                img;
+                img,
+                input=[];
             for (let i = 0; i < json.results.length; i++) {
                 room = json.results[i];
                 img = (room.photos != "") ? `<img src="${room.photos}" style="height:60px" alt="${room.name}">` : '';
@@ -123,7 +171,7 @@
                             <td>${img}</td>
                             <td>${roomAm}</td>
                             <td>${room.persons}</td>
-                            <td>${room.prices}</td>
+                            <td>${input}</td>
                             <td>
                                 <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="openEditRooms($(this))" data-id="${room.id}"><i class="fas fa-edit"></i> Редактировать</a>
                                 <a href="javascript:void(0)" class="btn btn-danger btn-sm" onclick="openDeleteRooms($(this))" data-id="${room.id}"><i class="far fa-trash-alt"></i> Удалить</a>

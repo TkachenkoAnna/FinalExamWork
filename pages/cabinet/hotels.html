@@ -39,8 +39,6 @@
                     </div>
                     <div class="services_selector">
                     </div>
-                    <!--по id services_select формируется и вставляется список услуг, именно список option
-                    <select class="form-select" multiple aria-label="multiple service_select" name="services" id="services_select"></select>-->
                 </form>
             </div>
             <div class="modal-footer">
@@ -73,7 +71,6 @@
                 for (let r = 0; r < room.length; r++) {
                     roomID += room[r].id + '; ';
                 }
-                //список сервисов выведем названиями
                 service_names = [];
                 hotel.services.forEach(function(s) {
                     service_names.push(s.name);
@@ -104,16 +101,10 @@
             let form = $("#hotel_form");
             form.find("input[name='id']").val(json.id);
             form.find("input[name='name']").val(json.name);
-            /*
-            так как сервисов может быть привязано несколько, то нужно сформировать массив значений и его передать в установку val()
-            */
-            let service_val = []; //пустой массив для значений
-            json.services.forEach(function(s) { //цикл по всем значениям сервисов у отеля
-                //значение сервиса у Александра выглядит как ссылка на получение одного сервиса
-                //не очень удобно для нас, но чтош... придется подстраиваться
+            let service_val = []; 
+            json.services.forEach(function(s) { 
                 service_val.push(`https://beetroot.quidow.pp.ua/api/services/${s.id}/`);
             });
-            //устанавливаем значение, только если есть что устанавливать
             if (service_val.length > 0) {
                 form.find("select[name='services']").val(service_val);
             }
@@ -163,26 +154,6 @@
         };
         loadCabinet('rooms');
     }
- 
-    /*
-    функция для  выбора сервисов в виде селекта
-    */
-    /*function getOptions(elem, id = 0) {
-        SERVICES.getList().done(function(json) {
-            let opts = `<option value="0" disabled>-=Выберите услуги=-</option>`,
-                selected = '';
-            for (let i = 0; i < json.results.length; i++) {
-                opts += `<option value="https://beetroot.quidow.pp.ua/api/services/${json.results[i].id}/">${json.results[i].name}</option>`;
-            }
-            $("#services_select").html(opts);
-        }).fail(function(err) {
-            showMessage(errorText(err.status), 'error');
-        });
-    }*/
-
-    /*
-    функция получения и динамического заполнения списка сервисов
-    */
     function getOptions() {
         SERVICES.getList().done(function(json) {
             let html = '<span> Выберите сервисы:</span>';

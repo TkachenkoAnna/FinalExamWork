@@ -120,6 +120,9 @@
         }
         if (valid) {
             let data = new FormData(form[0]);
+            if($("#serviceIcon").val()==""){
+                data.delete("icon");
+            }
             if (id == 'new') {
                 SERVICES.add(data).done(function() {
                     form[0].reset();

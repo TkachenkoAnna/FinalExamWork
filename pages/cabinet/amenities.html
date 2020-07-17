@@ -122,6 +122,9 @@
         }
         if (valid) {
             let data = new FormData(form[0]);
+            if($("#amenitiesIcon").val()==""){
+                data.delete("icon");
+            }
             if (id == 'new') {
                 AMENITIES.add(data).done(function() {
                     form[0].reset();

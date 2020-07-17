@@ -146,20 +146,21 @@
 function openDeleteService($btn) {
     let id = $btn.data("id");
     Swal.fire({
-        title: 'Are you sure?',
-        text: "Delete service with id: " + id,
+        title: 'Вы уверены?',
+        text: "Удалить сервис с id: " + id,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Да, удалить!',
+        cancelButtonText: 'Отмена'
     }).then((result) => {
         if (result.value) {
             SERVICES.delete(id).done(function() {
                 getServicesTable();
                 Swal.fire(
-                    'Deleted!',
-                    'Service has been deleted.',
+                    'Удаление!',
+                    'Сервис удален.',
                     'success'
                 );
             });

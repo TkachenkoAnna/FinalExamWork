@@ -148,20 +148,20 @@
 function openDeleteAmenity($btn) {
     let id = $btn.data("id");
     Swal.fire({
-        title: 'Are you sure?',
-        text: "Delete service with id: " + id,
+        title: 'Вы уверены?',
+        text: "Удалить улугу с id: " + id,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Да, удалить!'
     }).then((result) => {
         if (result.value) {
             AMENITIES.delete(id).done(function() {
                 getAmenitiesTable();
                 Swal.fire(
-                    'Deleted!',
-                    'Service has been deleted.',
+                    'Удаление!',
+                    'Услуга удалена.',
                     'success'
                 );
             });

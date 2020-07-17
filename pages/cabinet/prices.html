@@ -2,6 +2,9 @@
     <h1 class="h2">Цены номера <span id="room_name"></span></h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-success" onclick="backToRooms()"><i class="fas fa-arrow-left"></i> К номерам</button>
+        </div>
+        <div class="btn-group mr-2">
             <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#pricesModal"><i class="fas fa-plus-circle"></i> Добавить еще</button>
         </div>
     </div>
@@ -160,19 +163,24 @@ function getPricesTable(h_id, r_id) {
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Да, удалить ее!'
+            confirmButtonText: 'Да, удалить!',
+            cancelButtonText: 'Отмена'
         }).then((result) => {
             if (result.value) {
                 PRICES.delete(h_id, r_id, p_id).done(function() {
                     getPricesTable(EDITHOTEL_ID.id, EDITROOM_ID.id);
                     Swal.fire(
-                        'Удалено!',
+                        'Удаление!',
                         'Стоимость удалена.',
                         'success'
                     );
                 });
             }
         })
+    }
+
+    function backToRooms() {
+        loadCabinet('rooms');
     }
 
 </script>

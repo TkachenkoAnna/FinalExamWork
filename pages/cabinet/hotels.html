@@ -205,13 +205,14 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Да, удалить его!'
+            confirmButtonText: 'Да, удалить!',
+            cancelButtonText: 'Отмена'
         }).then((result) => {
             if (result.value) {
                 HOTELS.delete(id).done(function() {
                     getHotelTable();
                     Swal.fire(
-                        'Удалено!',
+                        'Удаление!',
                         'Отель удален.',
                         'success'
                     );

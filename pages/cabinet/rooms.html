@@ -108,7 +108,7 @@
                             <td>${room.name}</td>
                             <td>${img}</td>
                             <td>${roomAm}</td>
-                            <td>${room.persons}</td>
+                            <td class="text-center">${room.persons}</td>
                             <td><a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="roomPrices($(this))" data-id="${room.id}" data-name="${room.name}"><i class="fas fa-money-check-alt"></i>  Цены</a></td>
                             <td>
                                 <a href="javascript:void(0)" class="btn btn-info btn-sm" onclick="openEditRooms($(this))" data-id="${room.id}"><i class="fas fa-edit"></i> Редактировать</a>
@@ -185,13 +185,14 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Да, удалить её!'
+            confirmButtonText: 'Да, удалить!',
+            cancelButtonText: 'Отмена'
         }).then((result) => {
             if (result.value) {
                 ROOMS.delete(h_id, r_id).done(function() {
                     getRoomsTable(EDITHOTEL_ID.id);
                     Swal.fire(
-                        'Удалено!',
+                        'Удаление!',
                         'Комната удалена.',
                         'success'
                     );
